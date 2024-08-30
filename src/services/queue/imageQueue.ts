@@ -1,7 +1,7 @@
 import Queue from 'bull';
 import validateCSV from '../../utils/csv/validateCSV';
 import parseCSV from '../../utils/csv/parseCSV';
-import cloudinary from '../cloudinary';
+import cloudinary from '../../clients/cloudinary';
 import compressImage from '../../utils/image/compressImage';
 import { redisClient } from '../../clients/redisClient';
 
