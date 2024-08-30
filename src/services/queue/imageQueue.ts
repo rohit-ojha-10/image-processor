@@ -6,11 +6,12 @@ import compressImage from '../../utils/image/compressImage';
 import { redisClient } from '../../clients/redisClient';
 
 const imageQueue = new Queue('imageQueue', {
-  redis: {
-    host: 'localhost',
-    port: 6379,
-  },
-});
+    redis: {
+      password: process.env.REDIS_PW,
+      host: process.env.REDIS_HOST,
+      port: 18362,
+    },
+  });
 
   imageQueue.process('processImages', async (job) => {
     const { filePath, requestId } = job.data;
