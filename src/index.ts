@@ -3,7 +3,7 @@ import cors from 'cors';
 import imageRouter from './routes/image.route';
 import statusRouter from './routes/status.routes';
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -14,7 +14,7 @@ app.use('/status', statusRouter);
 
 
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+  res.send('Well this link works I guess.');
 });
 
 app.listen(port, () => {
