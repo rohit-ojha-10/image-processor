@@ -1,25 +1,33 @@
 import axios from 'axios';
-import fs from 'fs';
+import fs from 'fs-extra';
 import sharp from 'sharp';
 import path from 'path';
 
-const compressImage = async (imageUrl: string): Promise<string> => {
-    const response = await axios({ url: imageUrl, responseType: 'arraybuffer' });
-    const inputPath = path.join(__dirname, '../tmp/input.jpg');
-    const outputPath = path.join(__dirname, '../tmp/output.jpg');
+const TEMP_DIR = path.join(__dirname, '../tmp');
 
-    fs.writeFileSync(inputPath, response.data);
+// Ensure tmp directory exists
+fs.ensureDirSync(TEMP_DIR);
 
-    await sharp(inputPath)
-        .resize({ width: 800 }) // Resize image
-        .jpeg({ quality: 50 }) // Compress image
-        .toFile(outputPath);
+const compressImage = async (imageUrl: string): Promise<{inputPath: string, outputPath: string}> => {
+    const uniqueId = Date.now().toString(); // Unique identifier for each file
+    const inputPath = path.join(TEMP_DIR, `input-${uniqueId}.jpg`);
+    const outputPath = path.join(TEMP_DIR, `output-${uniqueId}.jpg`);
 
-    // Cleanup
-    fs.unlinkSync(inputPath);
+    try {
+        // Download image
+        const response = await axios({ url: imageUrl, responseType: 'arraybuffer' });
+        fs.writeFileSync(inputPath, response.data);
 
-    // For demonstration, we return the path. In a real scenario, you'd upload the file to a server or cloud storage.
-    return outputPath;
+        // Compress image
+        await sharp(inputPath)
+            .resize({ width: 800 }) // Resize image
+            .jpeg({ quality: 50 })  // Compress image
+            .toFile(outputPath);
+
+        return { inputPath, outputPath };
+    } catch (error) {
+        console.error('Error processing image:', imageUrl, error);
+        throw error;
+    }
 };
-
-export { compressImage };
+export default  compressImage;

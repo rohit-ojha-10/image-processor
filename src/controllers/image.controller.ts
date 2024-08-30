@@ -1,5 +1,4 @@
 import { v4 as uuidv4 } from "uuid";
-import parseCSV from "../utils/csv/parseCSV";
 import validateCSV from "../utils/csv/validateCSV";
 import path from "path";
 import { Request, Response } from "express";
@@ -9,7 +8,6 @@ export const uploadFile = async (
   req: Request & { file: Express.Multer.File },
   res: Response
 ) => {
-  // TODO: handle image upload
   if (!req.file) {
     return res.status(400).send("No file uploaded.");
   }
@@ -23,14 +21,10 @@ export const uploadFile = async (
       return res.status(400).json({ errors });
     }
 
-    // Parse the CSV file
-    const csvData = await parseCSV(filePath);
-
     // Generate a unique request ID
     const requestId = uuidv4();
 
-    // You can add further processing here, like saving to a database or enqueueing jobs
-
+    // Add the job to the queue
     await imageQueue.add(
       "processImages",
       {
@@ -38,10 +32,11 @@ export const uploadFile = async (
         requestId,
       },
       {
-        jobId: requestId, // Assign the requestId as the job ID
+        jobId: requestId,
       }
     );
 
+    // returning the requestId immediately...
     res.json({ requestId });
   } catch (error) {
     console.error("Error processing the file:", error);

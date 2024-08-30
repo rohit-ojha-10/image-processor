@@ -22,13 +22,13 @@ const validateCSV = async (filePath: string): Promise<string[]> => {
             }
 
             // Validate image URLs
-            const urlsString = row['Input Image Urls'];
-                // Remove quotes and split URLs
-                const urls = urlsString.split(',').map(url => url.trim());
-                if (urls.some(url => !/^https?:\/\/.+\.(jpg|jpeg|png|gif)$/i.test(url))) {
-                    errors.push(`Row ${index + 1}: Some image URLs are not valid.`);
+            // const urlsString = row['Input Image Urls'];
+            //     // Remove quotes and split URLs
+            //     const urls = urlsString.split(',').map(url => url.trim());
+            //     if (urls.some(url => !/^https?:\/\/.+\.(jpg|jpeg|png|gif)$/i.test(url))) {
+            //         errors.push(`Row ${index + 1}: Some image URLs are not valid.`);
                     
-                }
+            //     }
         });
     } catch (error) {
         errors.push('Error reading or parsing the CSV file.');
