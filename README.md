@@ -5,6 +5,8 @@
     <span style="font-size: 1.5em; margin-right: 10px;">Run in Postman</span>
 </a>
 
+
+
 This guide walks you through using the Image Processing API, enabling you to upload a CSV file for validation and effortlessly queue your images for compression.
 
 
