@@ -1,7 +1,13 @@
+### Run in Postman
+
+<a href="https://www.postman.com/test-api-personal/workspace/personal-testing/collection/28617093-4fe4b271-2606-4f98-aaba-abc3aa6342dd?action=share&creator=28617093" target="_blank">
+    <img src="https://cdn.worldvectorlogo.com/logos/postman.svg" alt="Run in Postman" width="50" height="50">
+</a>
+
 ## 🚀 Process CSV
-[![Run in Postman](https://cdn.worldvectorlogo.com/logos/postman.svg)](https://www.postman.com/test-api-personal/workspace/personal-testing/collection/28617093-4fe4b271-2606-4f98-aaba-abc3aa6342dd?action=share&creator=28617093)
 
 This guide walks you through using the Image Processing API, enabling you to upload a CSV file for validation and effortlessly queue your images for compression.
+
 
 
 ### 🔖 How to Use This Collection
