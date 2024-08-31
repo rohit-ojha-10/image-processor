@@ -13,31 +13,38 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
-const fs_extra_1 = __importDefault(require("fs-extra"));
 const sharp_1 = __importDefault(require("sharp"));
-const path_1 = __importDefault(require("path"));
-const TEMP_DIR = path_1.default.join(__dirname, '../tmp');
-// Ensure tmp directory exists
-fs_extra_1.default.ensureDirSync(TEMP_DIR);
-const compressImage = (imageUrl) => __awaiter(void 0, void 0, void 0, function* () {
-    const uniqueId = Date.now().toString(); // Unique identifier for each file
-    const inputPath = path_1.default.join(TEMP_DIR, `input-${uniqueId}.jpg`);
-    const outputPath = path_1.default.join(TEMP_DIR, `output-${uniqueId}.jpg`);
+const cloudinary_1 = __importDefault(require("../../clients/cloudinary"));
+// Function to compress the image and upload it to Cloudinary
+const compressAndUploadImage = (imageUrl) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Download image
         const response = yield (0, axios_1.default)({ url: imageUrl, responseType: 'arraybuffer' });
-        fs_extra_1.default.writeFileSync(inputPath, response.data);
+        const imageBuffer = Buffer.from(response.data);
         // Compress image
-        yield (0, sharp_1.default)(inputPath)
+        const compressedImageBuffer = yield (0, sharp_1.default)(imageBuffer)
             .resize({ width: 800 }) // Resize image
             .jpeg({ quality: 50 }) // Compress image
-            .toFile(outputPath);
-        return { inputPath, outputPath };
+            .toBuffer();
+        // Upload to Cloudinary
+        const result = yield new Promise((resolve, reject) => {
+            const stream = cloudinary_1.default.uploader.upload_stream({ resource_type: 'image' }, (error, result) => {
+                if (error) {
+                    reject(error);
+                }
+                else {
+                    resolve(result);
+                }
+            });
+            stream.end(compressedImageBuffer);
+        });
+        console.log(`Uploaded image to Cloudinary: ${result.secure_url}`);
+        return result.secure_url;
     }
     catch (error) {
         console.error('Error processing image:', imageUrl, error);
         throw error;
     }
 });
-exports.default = compressImage;
+exports.default = compressAndUploadImage;
 //# sourceMappingURL=compressImage.js.map

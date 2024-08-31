@@ -12,11 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uploadFile = void 0;
+exports.uploadFile = exports.UPLOADS_DIR = void 0;
 const uuid_1 = require("uuid");
 const validateCSV_1 = __importDefault(require("../utils/csv/validateCSV"));
 const path_1 = __importDefault(require("path"));
 const imageQueue_1 = __importDefault(require("../services/queue/imageQueue"));
+exports.UPLOADS_DIR = path_1.default.join(__dirname, "../uploads");
 const uploadFile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (!req.file) {
         return res.status(400).send("No file uploaded.");
