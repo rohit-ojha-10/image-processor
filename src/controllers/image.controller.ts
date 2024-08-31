@@ -3,8 +3,21 @@ import validateCSV from "../utils/csv/validateCSV";
 import path from "path";
 import { Request, Response } from "express";
 import imageQueue from "../services/queue/imageQueue";
-
+import fs from 'fs-extra';
 export const UPLOADS_DIR = path.join(__dirname, "../uploads");
+
+// Ensure the uploads directory exists
+const ensureUploadsDir = () => {
+    if (!fs.existsSync(UPLOADS_DIR)) {
+        fs.ensureDirSync(UPLOADS_DIR);
+        console.log(`Created directory: ${UPLOADS_DIR}`);
+    } else {
+        console.log(`Directory already exists: ${UPLOADS_DIR}`);
+    }
+};
+
+// Call the function to ensure the directory is created
+ensureUploadsDir();
 
 export const uploadFile = async (
   req: Request & { file: Express.Multer.File },
