@@ -1,7 +1,7 @@
 ## 🚀 Process CSV
 
 <a href="https://www.postman.com/test-api-personal/workspace/personal-testing/collection/28617093-4fe4b271-2606-4f98-aaba-abc3aa6342dd?action=share&creator=28617093" target="_blank" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
-    <img src="https://cdn.worldvectorlogo.com/logos/postman.svg" alt="Run in Postman" width="50" height="50">
+<!--     <img src="https://cdn.worldvectorlogo.com/logos/postman.svg" alt="Run in Postman" width="50" height="50"> -->
     <span style="font-size: 1.5em; margin-right: 10px;">Run in Postman</span>
 </a>
 
