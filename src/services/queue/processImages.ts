@@ -3,6 +3,8 @@ import parseCSV from "../../utils/csv/parseCSV";
 import validateCSV from "../../utils/csv/validateCSV";
 import compressAndUploadImage from "../../utils/image/compressImage";
 import fs from "fs-extra";
+const stagger = async (ms: number | undefined) =>
+  await new Promise((res) => setTimeout(() => res(true), ms || 5_000));
 const processImages = async (job) => {
   try {
     const { fileUrl, requestId } = job.data;
@@ -14,7 +16,7 @@ const processImages = async (job) => {
       throw new Error(`Validation errors: ${errors.join(", ")}`);
     }
     //stagger
-    await new Promise((res) => setTimeout(() => res(true), 5_000));
+    await stagger(10_000);
     // Parse the CSV file
     const csvData = await parseCSV(fileUrl);
 
@@ -34,6 +36,7 @@ const processImages = async (job) => {
 
       for (const imageUrl of imageUrls) {
         const compressedImageUrl = await compressAndUploadImage(imageUrl);
+        await stagger(3_000);
         outputUrls.push(compressedImageUrl);
         await redisClient.hSet(
           `job:${requestId}`,
