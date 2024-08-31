@@ -1,23 +1,22 @@
 import { redisClient } from "../../clients/redisClient";
-import { UPLOADS_DIR } from "../../controllers/image.controller";
 import parseCSV from "../../utils/csv/parseCSV";
 import validateCSV from "../../utils/csv/validateCSV";
 import compressAndUploadImage from "../../utils/image/compressImage";
 import fs from "fs-extra";
 const processImages = async (job) => {
   try {
-    const { filePath, requestId } = job.data;
-    console.log(`Job ${requestId} started processing file: ${filePath}`);
+    const { fileUrl, requestId } = job.data;
+    console.log(`Job ${requestId} started processing file: ${fileUrl}`);
 
     // Validate the CSV file
-    const errors = await validateCSV(filePath);
+    const errors = await validateCSV(fileUrl);
     if (errors.length > 0) {
       throw new Error(`Validation errors: ${errors.join(", ")}`);
     }
     //stagger
-    await new Promise((res) => setTimeout(() => res(true), 10_000));
+    await new Promise((res) => setTimeout(() => res(true), 5_000));
     // Parse the CSV file
-    const csvData = await parseCSV(filePath);
+    const csvData = await parseCSV(fileUrl);
 
     // Process each image URL
     const totalImages = csvData.reduce(
@@ -52,7 +51,6 @@ const processImages = async (job) => {
 
       uploadedUrls[row["Product Name"]] = outputUrls;
     }
-    await fs.emptyDirSync(UPLOADS_DIR);
     // await fs.emptyDirSync(TEMP_DIR); // Clear tmp directory
 
     console.log(`Job ${requestId} processed successfully.`);

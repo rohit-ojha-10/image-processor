@@ -1,17 +1,22 @@
-import fs from 'fs';
+import axios from 'axios';
 import { parse } from 'fast-csv';
+import { Readable } from 'stream';
 
-// Validate if image URLs are enclosed in quotes
-const validateCSV = async (filePath: string): Promise<string[]> => {
+const validateCSV = async (fileUrl: string): Promise<string[]> => {
     const errors: string[] = [];
-    
+
     try {
-        const rows = await new Promise<any[]>((resolve, reject) => {
-            const results: any[] = [];
-            fs.createReadStream(filePath)
+        // Fetch the CSV file from Cloudinary
+        const response = await axios.get(fileUrl, { responseType: 'stream' });
+
+        const rows: any[] = [];
+        const stream = response.data as Readable;
+
+        await new Promise<void>((resolve, reject) => {
+            stream
                 .pipe(parse({ headers: true }))
-                .on('data', (row) => results.push(row))
-                .on('end', () => resolve(results))
+                .on('data', (row) => rows.push(row))
+                .on('end', () => resolve())
                 .on('error', (error) => reject(error));
         });
 
@@ -20,20 +25,11 @@ const validateCSV = async (filePath: string): Promise<string[]> => {
             if (!row['Serial Number'] || !row['Product Name'] || !row['Input Image Urls']) {
                 errors.push(`Row ${index + 1}: Missing required columns.`);
             }
-
-            // Validate image URLs
-            // const urlsString = row['Input Image Urls'];
-            //     // Remove quotes and split URLs
-            //     const urls = urlsString.split(',').map(url => url.trim());
-            //     if (urls.some(url => !/^https?:\/\/.+\.(jpg|jpeg|png|gif)$/i.test(url))) {
-            //         errors.push(`Row ${index + 1}: Some image URLs are not valid.`);
-                    
-            //     }
         });
     } catch (error) {
-        errors.push('Error reading or parsing the CSV file.');
+        errors.push('Error fetching or parsing the CSV file.');
     }
-    
+
     return errors;
 };
 

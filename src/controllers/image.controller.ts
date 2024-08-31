@@ -1,23 +1,9 @@
 import { v4 as uuidv4 } from "uuid";
 import validateCSV from "../utils/csv/validateCSV";
-import path from "path";
 import { Request, Response } from "express";
+import cloudinary from '../clients/cloudinary'; // Adjust the import as needed
+import { Readable } from 'stream';
 import imageQueue from "../services/queue/imageQueue";
-import fs from 'fs-extra';
-export const UPLOADS_DIR = path.join(__dirname, "../uploads");
-
-// Ensure the uploads directory exists
-const ensureUploadsDir = () => {
-    if (!fs.existsSync(UPLOADS_DIR)) {
-        fs.ensureDirSync(UPLOADS_DIR);
-        console.log(`Created directory: ${UPLOADS_DIR}`);
-    } else {
-        console.log(`Directory already exists: ${UPLOADS_DIR}`);
-    }
-};
-
-// Call the function to ensure the directory is created
-ensureUploadsDir();
 
 export const uploadFile = async (
   req: Request & { file: Express.Multer.File },
@@ -28,23 +14,37 @@ export const uploadFile = async (
   }
 
   try {
+    // Upload the file to Cloudinary
+    const uploadResult = await new Promise<{ secure_url: string }>((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { resource_type: 'auto' },
+        (error, result) => {
+          if (error) {
+            return reject(error);
+          }
+          resolve(result);
+        }
+      );
 
-    const filePath = path.join(__dirname, "../uploads", req.file.filename);
+      // Pipe the file buffer directly to Cloudinary
+      Readable.from(req.file.buffer).pipe(uploadStream);
+    });
 
-    // Validate the CSV file
-    const errors = await validateCSV(filePath);
-    if (errors?.length > 0) {
-      return res.status(400).json({ errors });
-    }
+    // The URL of the uploaded file on Cloudinary
+    const fileUrl = uploadResult.secure_url;
+
+    // Validate the CSV file if needed
+    // Since we are uploading directly to Cloudinary, this step is for processing the uploaded file.
+    await validateCSV(fileUrl);
 
     // Generate a unique request ID
     const requestId = uuidv4();
 
-    // Add the job to the queue
+    // Add the job to the queue with the Cloudinary URL
     await imageQueue.add(
       "processImages",
       {
-        filePath,
+        fileUrl,
         requestId,
       },
       {
@@ -52,7 +52,7 @@ export const uploadFile = async (
       }
     );
 
-    // returning the requestId immediately...
+    // Return the request ID immediately
     res.json({ requestId });
   } catch (error) {
     console.error("Error processing the file:", error);

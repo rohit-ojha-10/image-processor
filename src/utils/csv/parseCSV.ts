@@ -1,18 +1,17 @@
-import fs from 'fs';
-import path from 'path';
+import axios from 'axios';
 import { parse } from 'fast-csv';
+import { Readable } from 'stream';
 
-const parseCSV = (filePath: string): Promise<any[]> => {
-    return new Promise((resolve, reject) => {
-        // Check if the file exists before attempting to read it
-        fs.access(filePath, fs.constants.F_OK, (err) => {
-            if (err) {
-                return reject(new Error(`File not found: ${filePath}`));
-            }
+const parseCSV = async (fileUrl: string): Promise<any[]> => {
+    try {
+        // Fetch the CSV file from Cloudinary
+        const response = await axios.get(fileUrl, { responseType: 'stream' });
 
-            const results: any[] = [];
+        const results: any[] = [];
+        const stream = response.data as Readable;
 
-            fs.createReadStream(filePath)
+        return new Promise((resolve, reject) => {
+            stream
                 .pipe(parse({ headers: true }))
                 .on('data', (row) => {
                     // Filter out empty rows
@@ -26,7 +25,10 @@ const parseCSV = (filePath: string): Promise<any[]> => {
                     reject(error);
                 });
         });
-    });
+    } catch (error) {
+        console.error('Error fetching CSV from URL:', error);
+        throw new Error(`Error fetching CSV from URL: ${fileUrl}`);
+    }
 };
 
 export default parseCSV;
