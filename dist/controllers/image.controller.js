@@ -17,7 +17,20 @@ const uuid_1 = require("uuid");
 const validateCSV_1 = __importDefault(require("../utils/csv/validateCSV"));
 const path_1 = __importDefault(require("path"));
 const imageQueue_1 = __importDefault(require("../services/queue/imageQueue"));
+const fs_extra_1 = __importDefault(require("fs-extra"));
 exports.UPLOADS_DIR = path_1.default.join(__dirname, "../uploads");
+// Ensure the uploads directory exists
+const ensureUploadsDir = () => {
+    if (!fs_extra_1.default.existsSync(exports.UPLOADS_DIR)) {
+        fs_extra_1.default.ensureDirSync(exports.UPLOADS_DIR);
+        console.log(`Created directory: ${exports.UPLOADS_DIR}`);
+    }
+    else {
+        console.log(`Directory already exists: ${exports.UPLOADS_DIR}`);
+    }
+};
+// Call the function to ensure the directory is created
+ensureUploadsDir();
 const uploadFile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (!req.file) {
         return res.status(400).send("No file uploaded.");
