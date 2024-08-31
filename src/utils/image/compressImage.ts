@@ -1,33 +1,41 @@
+
 import axios from 'axios';
-import fs from 'fs-extra';
 import sharp from 'sharp';
-import path from 'path';
+import cloudinary from '../../clients/cloudinary';
 
-const TEMP_DIR = path.join(__dirname, '../tmp');
-
-// Ensure tmp directory exists
-fs.ensureDirSync(TEMP_DIR);
-
-const compressImage = async (imageUrl: string): Promise<{inputPath: string, outputPath: string}> => {
-    const uniqueId = Date.now().toString(); // Unique identifier for each file
-    const inputPath = path.join(TEMP_DIR, `input-${uniqueId}.jpg`);
-    const outputPath = path.join(TEMP_DIR, `output-${uniqueId}.jpg`);
-
+// Function to compress the image and upload it to Cloudinary
+const compressAndUploadImage = async (imageUrl: string): Promise<string> => {
     try {
         // Download image
         const response = await axios({ url: imageUrl, responseType: 'arraybuffer' });
-        fs.writeFileSync(inputPath, response.data);
+        const imageBuffer = Buffer.from(response.data);
 
         // Compress image
-        await sharp(inputPath)
+        const compressedImageBuffer = await sharp(imageBuffer)
             .resize({ width: 800 }) // Resize image
             .jpeg({ quality: 50 })  // Compress image
-            .toFile(outputPath);
+            .toBuffer();
 
-        return { inputPath, outputPath };
+        // Upload to Cloudinary
+        const result = await new Promise<any>((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream({ resource_type: 'image' }, (error, result) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(result);
+                }
+            });
+
+            stream.end(compressedImageBuffer);
+        });
+
+        console.log(`Uploaded image to Cloudinary: ${result.secure_url}`);
+        return result.secure_url;
+
     } catch (error) {
         console.error('Error processing image:', imageUrl, error);
         throw error;
     }
 };
-export default  compressImage;
+
+export default compressAndUploadImage;

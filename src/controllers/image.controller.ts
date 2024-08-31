@@ -4,6 +4,8 @@ import path from "path";
 import { Request, Response } from "express";
 import imageQueue from "../services/queue/imageQueue";
 
+export const UPLOADS_DIR = path.join(__dirname, "../uploads");
+
 export const uploadFile = async (
   req: Request & { file: Express.Multer.File },
   res: Response
@@ -13,6 +15,7 @@ export const uploadFile = async (
   }
 
   try {
+
     const filePath = path.join(__dirname, "../uploads", req.file.filename);
 
     // Validate the CSV file
