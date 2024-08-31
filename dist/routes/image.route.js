@@ -6,8 +6,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const multer_1 = __importDefault(require("multer"));
 const image_controller_1 = require("../controllers/image.controller");
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const imageRouter = (0, express_1.Router)();
-const upload = (0, multer_1.default)({ dest: 'src/uploads/' });
+const upload = (0, multer_1.default)({ dest: process.env.UPLOAD_DEST || 'src/uploads/' });
 imageRouter.post('/upload', upload.single('file'), image_controller_1.uploadFile);
 exports.default = imageRouter;
 //# sourceMappingURL=image.route.js.map
