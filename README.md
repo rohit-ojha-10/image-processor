@@ -10,7 +10,9 @@
 This guide walks you through using the Image Processing API, enabling you to upload a CSV file for validation and effortlessly queue your images for compression.
 
 
+### System Design Flow
 
+For a visual representation of the system design, including the flow of data and interactions between components, you can view the diagram [here](https://drive.google.com/file/d/1_LjoP7jlBBO_Nci8NCNiZtAwRsFgquhe/view?usp=sharing).
 
 
 ### 🔖 How to Use This Collection
