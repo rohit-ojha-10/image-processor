@@ -16,6 +16,7 @@ const redisClient_1 = require("../../clients/redisClient");
 const parseCSV_1 = __importDefault(require("../../utils/csv/parseCSV"));
 const validateCSV_1 = __importDefault(require("../../utils/csv/validateCSV"));
 const compressImage_1 = __importDefault(require("../../utils/image/compressImage"));
+const stagger = (ms) => __awaiter(void 0, void 0, void 0, function* () { return yield new Promise((res) => setTimeout(() => res(true), ms || 5000)); });
 const processImages = (job) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { fileUrl, requestId } = job.data;
@@ -26,7 +27,7 @@ const processImages = (job) => __awaiter(void 0, void 0, void 0, function* () {
             throw new Error(`Validation errors: ${errors.join(", ")}`);
         }
         //stagger
-        yield new Promise((res) => setTimeout(() => res(true), 5000));
+        yield stagger(10000);
         // Parse the CSV file
         const csvData = yield (0, parseCSV_1.default)(fileUrl);
         // Process each image URL
@@ -40,6 +41,7 @@ const processImages = (job) => __awaiter(void 0, void 0, void 0, function* () {
             const outputUrls = [];
             for (const imageUrl of imageUrls) {
                 const compressedImageUrl = yield (0, compressImage_1.default)(imageUrl);
+                yield stagger(3000);
                 outputUrls.push(compressedImageUrl);
                 yield redisClient_1.redisClient.hSet(`job:${requestId}`, row["Product Name"], JSON.stringify(outputUrls));
                 // Update progress
