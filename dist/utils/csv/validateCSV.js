@@ -12,18 +12,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const fs_1 = __importDefault(require("fs"));
+const axios_1 = __importDefault(require("axios"));
 const fast_csv_1 = require("fast-csv");
-// Validate if image URLs are enclosed in quotes
-const validateCSV = (filePath) => __awaiter(void 0, void 0, void 0, function* () {
+const validateCSV = (fileUrl) => __awaiter(void 0, void 0, void 0, function* () {
     const errors = [];
     try {
-        const rows = yield new Promise((resolve, reject) => {
-            const results = [];
-            fs_1.default.createReadStream(filePath)
+        // Fetch the CSV file from Cloudinary
+        const response = yield axios_1.default.get(fileUrl, { responseType: 'stream' });
+        const rows = [];
+        const stream = response.data;
+        yield new Promise((resolve, reject) => {
+            stream
                 .pipe((0, fast_csv_1.parse)({ headers: true }))
-                .on('data', (row) => results.push(row))
-                .on('end', () => resolve(results))
+                .on('data', (row) => rows.push(row))
+                .on('end', () => resolve())
                 .on('error', (error) => reject(error));
         });
         rows.forEach((row, index) => {
@@ -31,17 +33,10 @@ const validateCSV = (filePath) => __awaiter(void 0, void 0, void 0, function* ()
             if (!row['Serial Number'] || !row['Product Name'] || !row['Input Image Urls']) {
                 errors.push(`Row ${index + 1}: Missing required columns.`);
             }
-            // Validate image URLs
-            // const urlsString = row['Input Image Urls'];
-            //     // Remove quotes and split URLs
-            //     const urls = urlsString.split(',').map(url => url.trim());
-            //     if (urls.some(url => !/^https?:\/\/.+\.(jpg|jpeg|png|gif)$/i.test(url))) {
-            //         errors.push(`Row ${index + 1}: Some image URLs are not valid.`);
-            //     }
         });
     }
     catch (error) {
-        errors.push('Error reading or parsing the CSV file.');
+        errors.push('Error fetching or parsing the CSV file.');
     }
     return errors;
 });

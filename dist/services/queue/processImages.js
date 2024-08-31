@@ -13,24 +13,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const redisClient_1 = require("../../clients/redisClient");
-const image_controller_1 = require("../../controllers/image.controller");
 const parseCSV_1 = __importDefault(require("../../utils/csv/parseCSV"));
 const validateCSV_1 = __importDefault(require("../../utils/csv/validateCSV"));
 const compressImage_1 = __importDefault(require("../../utils/image/compressImage"));
-const fs_extra_1 = __importDefault(require("fs-extra"));
 const processImages = (job) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { filePath, requestId } = job.data;
-        console.log(`Job ${requestId} started processing file: ${filePath}`);
+        const { fileUrl, requestId } = job.data;
+        console.log(`Job ${requestId} started processing file: ${fileUrl}`);
         // Validate the CSV file
-        const errors = yield (0, validateCSV_1.default)(filePath);
+        const errors = yield (0, validateCSV_1.default)(fileUrl);
         if (errors.length > 0) {
             throw new Error(`Validation errors: ${errors.join(", ")}`);
         }
         //stagger
-        yield new Promise((res) => setTimeout(() => res(true), 10000));
+        yield new Promise((res) => setTimeout(() => res(true), 5000));
         // Parse the CSV file
-        const csvData = yield (0, parseCSV_1.default)(filePath);
+        const csvData = yield (0, parseCSV_1.default)(fileUrl);
         // Process each image URL
         const totalImages = csvData.reduce((count, row) => count + row["Input Image Urls"].split(",").length, 0);
         let processedImages = 0;
@@ -51,7 +49,6 @@ const processImages = (job) => __awaiter(void 0, void 0, void 0, function* () {
             }
             uploadedUrls[row["Product Name"]] = outputUrls;
         }
-        yield fs_extra_1.default.emptyDirSync(image_controller_1.UPLOADS_DIR);
         // await fs.emptyDirSync(TEMP_DIR); // Clear tmp directory
         console.log(`Job ${requestId} processed successfully.`);
         return uploadedUrls;
